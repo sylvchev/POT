@@ -384,8 +384,8 @@ def sinkhorn_knopp(a, b, M, reg, numItermax=1000,
 
     Kp = (1 / a).reshape(-1, 1) * K
     cpt = 0
-    err = 1
-    while (err > stopThr and cpt < numItermax):
+    delta_err, err = 1, 1
+    while (delta_err > stopThr and cpt < numItermax):
         uprev = u
         vprev = v
 
@@ -410,7 +410,9 @@ def sinkhorn_knopp(a, b, M, reg, numItermax=1000,
             else:
                 # compute right marginal tmp2= (diag(u)Kdiag(v))^T1
                 np.einsum('i,ij,j->j', u, K, v, out=tmp2)
+            p_err = err
             err = np.linalg.norm(tmp2 - b)  # violation of marginal
+            delta_err = np.abs(p_err - err)
             if log:
                 log['err'].append(err)
 
